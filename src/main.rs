@@ -10,7 +10,6 @@ fn main() {
     let secret_number = rand::thread_rng().gen_range(1, 101);
 
     loop {
-        
         println!("Input your guess.");
 
         let mut guess =  String::new();
@@ -20,7 +19,7 @@ fn main() {
 
         let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,
-            Error => continue,
+            Err(_) => continue,
         };
 
         println!("You guessed: {}", guess);
