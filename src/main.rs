@@ -5,32 +5,75 @@ use std::cmp::Ordering;
 use rand::Rng;
 
 fn main() {
-    println!("Guess the number!");
+    println!("Welcome to 21!");
 
-    let secret_number = rand::thread_rng().gen_range(1, 101);
+    let dealer_hand = rand::thread_rng().gen_range(2, 21);
+    let mut player_hand = rand::thread_rng().gen_range(2, 21);
+    let bust_threshold: i32 = 21; 
+
 
     loop {
-        println!("Input your guess.");
+        println!("Your hand is: {}", player_hand);
+        println!("Dealer hand is: {}", dealer_hand);
 
-        let mut guess =  String::new();
-
-        io::stdin().read_line(&mut guess)
-            .expect("Failed to read line");
-
-        let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
+        if player_hand > bust_threshold || player_hand == bust_threshold {
+            end_game(player_hand, dealer_hand, bust_threshold);
+            break;
         };
 
-        println!("You guessed: {}", guess);
+        let mut user_input = String::new();    
 
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too big!"),
-            Ordering::Equal => {
-                println!("You win!");
+        println!("Would you like to hit? Enter [y] or [n].");
+
+        io::stdin().read_line(&mut user_input)
+            .expect("Please enter [y] or [n].");
+        
+        let will_hit: bool = match user_input.trim() {
+            "y" => true,
+            "n" => false,
+            _ => continue,
+        };
+        
+        if will_hit {
+            player_hand = draw_card(&player_hand);
+        } else {
+            calc_dealer_hand(player_hand, dealer_hand, bust_threshold);
+            break;
+        }
+    }
+}
+
+fn draw_card(hand: &i32) -> i32 {
+    let inc: i32 = rand::thread_rng().gen_range(1, 11);
+    hand + inc
+}
+
+fn end_game(player_hand: i32, dealer_hand: i32, bust_threshold: i32) {
+    println!("Final Player Hand: {}", player_hand);
+    println!("Final Dealer Hand: {}", dealer_hand);
+    if player_hand > bust_threshold {
+        println!("You bust! Dealer wins!");
+    } else if dealer_hand > bust_threshold {
+        println!("Dealer busts! You win!");
+    } else if player_hand > dealer_hand {
+        println!("You win!");
+    } else {
+        println!("Dealer wins!");
+    }
+
+}
+
+fn calc_dealer_hand(player_hand: i32, mut dealer_hand: i32, bust_threshold: i32) {
+    let dealer_hit_threshold: i32 = 16;
+
+    loop {
+        match dealer_hand.cmp(&dealer_hit_threshold) {
+            Ordering::Less => dealer_hand = draw_card(&dealer_hand),
+            Ordering::Greater => {
+                end_game(player_hand, dealer_hand, bust_threshold);
                 break;
-            }
+            },
+            Ordering::Equal => dealer_hand = draw_card(&dealer_hand),
         }
     }
 }
