@@ -56,7 +56,7 @@ fn main() {
         println!("Dealer card showing is: {}{}", dealer_hand.cards[0].value, dealer_hand.cards[0].suit);
 
         if player_hand.total_value > BUST_THRESHOLD || player_hand.total_value == BUST_THRESHOLD {
-            end_game(player_hand, dealer_hand);
+            end_game(player_hand, dealer_hand, &mut deck);
             break;
         };
 
@@ -98,9 +98,10 @@ fn draw_card(mut hand: Hand, deck: &mut Vec<Card>, number_of_cards: u8) -> Hand 
     hand
 }
 
-fn end_game(player_hand: Hand, dealer_hand: Hand) {
+fn end_game(player_hand: Hand, dealer_hand: Hand, mut deck: &mut Vec<Card>) {
     println!("Final Player Hand: {:?}", player_hand.cards);
     println!("Final Dealer Hand: {:?}", dealer_hand.cards);
+    println!("Cards left in deck: {}", deck.len());
     if player_hand.total_value > BUST_THRESHOLD {
         println!("You bust! Dealer wins!");
     } else if dealer_hand.total_value > BUST_THRESHOLD {
@@ -112,14 +113,14 @@ fn end_game(player_hand: Hand, dealer_hand: Hand) {
     }
 }
 
-fn calc_dealer_hand(player_hand: Hand, mut dealer_hand: Hand, deck: &mut Vec<Card>) {
+fn calc_dealer_hand(player_hand: Hand, mut dealer_hand: Hand, mut deck: &mut Vec<Card>) {
     let dealer_hit_threshold: u8 = 16;
 
     loop {
         match dealer_hand.total_value.cmp(&dealer_hit_threshold) {
             Ordering::Less => dealer_hand = draw_card(dealer_hand, deck, 1),
             Ordering::Greater => {
-                end_game(player_hand, dealer_hand);
+                end_game(player_hand, dealer_hand, &mut deck);
                 break;
             },
             Ordering::Equal => dealer_hand = draw_card(dealer_hand, deck, 1),
